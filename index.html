@@ -181,4 +181,91 @@
     };
   </script>
 </body>
+</html>,
+          p.sx,
+          p.sy,
+          pieceSize.width,
+          pieceSize.height,
+          p.dx,
+          p.dy,
+          pieceSize.width,
+          pieceSize.height
+        );
+      }
+    }
+
+    function getPieceAt(x, y) {
+      for (let i = pieces.length - 1; i >= 0; i--) {
+        const p = pieces[i];
+        if (
+          x >= p.dx &&
+          x <= p.dx + pieceSize.width &&
+          y >= p.dy &&
+          y <= p.dy + pieceSize.height
+        ) {
+          return { piece: p, index: i };
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const found = getPieceAt(x, y);
+      if (found) {
+        selectedPiece = found.piece;
+        offsetX = x - selectedPiece.dx;
+        offsetY = y - selectedPiece.dy;
+        pieces.splice(found.index, 1);
+        pieces.push(selectedPiece);
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!selectedPiece) return;
+      const rect = canvas.getBoundingClientRect();
+      selectedPiece.dx = e.clientX - rect.left - offsetX;
+      selectedPiece.dy = e.clientY - rect.top - offsetY;
+      draw();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      if (!selectedPiece) return;
+
+      const snapTolerance = 20;
+      if (
+        Math.abs(selectedPiece.dx - selectedPiece.tx) < snapTolerance &&
+        Math.abs(selectedPiece.dy - selectedPiece.ty) < snapTolerance
+      ) {
+        selectedPiece.dx = selectedPiece.tx;
+        selectedPiece.dy = selectedPiece.ty;
+        if (!selectedPiece.placed) {
+          selectedPiece.placed = true;
+          correctCount++;
+          if (correctCount === rows * cols) {
+            clearInterval(timerInterval);
+            alert("Bravo ! Puzzle terminé !");
+          }
+        }
+      }
+
+      selectedPiece = null;
+      draw();
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      selectedPiece = null;
+    });
+
+    restartBtn.addEventListener("click", () => {
+      initPuzzle();
+    });
+
+    img.onerror = () => {
+      console.error("Erreur de chargement de l'image.");
+    };
+  </script>
+</body>
 </html>
