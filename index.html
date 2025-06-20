@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Puzzle Vélo - 16 pièces</title>
   <style>
     body {
@@ -12,11 +12,15 @@
       flex-direction: column;
       align-items: center;
       font-family: sans-serif;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      touch-action: none;
     }
     canvas {
       border: 2px solid #333;
       margin-top: 20px;
-      cursor: pointer;
+      touch-action: none;
     }
     #timer {
       margin-top: 10px;
@@ -33,7 +37,7 @@
 <body>
   <h1>Puzzle Vélo - 16 pièces</h1>
   <div id="timer">Temps : 0 s</div>
-  <canvas id="puzzleCanvas" width="1024" height="1024"></canvas>
+  <canvas id="puzzleCanvas" width="600" height="600"></canvas>
   <button id="restartBtn">Rejouer</button>
   <script>
     const img = new Image();
@@ -122,10 +126,7 @@
       return null;
     }
 
-    canvas.addEventListener("mousedown", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+    function handleDown(x, y) {
       const found = getPieceAt(x, y);
       if (found) {
         selectedPiece = found.piece;
@@ -134,19 +135,17 @@
         pieces.splice(found.index, 1);
         pieces.push(selectedPiece);
       }
-    });
+    }
 
-    canvas.addEventListener("mousemove", (e) => {
+    function handleMove(x, y) {
       if (!selectedPiece) return;
-      const rect = canvas.getBoundingClientRect();
-      selectedPiece.dx = e.clientX - rect.left - offsetX;
-      selectedPiece.dy = e.clientY - rect.top - offsetY;
+      selectedPiece.dx = x - offsetX;
+      selectedPiece.dy = y - offsetY;
       draw();
-    });
+    }
 
-    canvas.addEventListener("mouseup", () => {
+    function handleUp() {
       if (!selectedPiece) return;
-
       const snapTolerance = 20;
       if (
         Math.abs(selectedPiece.dx - selectedPiece.tx) < snapTolerance &&
@@ -163,13 +162,51 @@
           }
         }
       }
-
       selectedPiece = null;
       draw();
+    }
+
+    function getEventPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches && e.touches.length > 0) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const { x, y } = getEventPos(e);
+      handleDown(x, y);
     });
 
-    canvas.addEventListener("mouseleave", () => {
-      selectedPiece = null;
+    canvas.addEventListener("mousemove", (e) => {
+      const { x, y } = getEventPos(e);
+      handleMove(x, y);
+    });
+
+    canvas.addEventListener("mouseup", handleUp);
+    canvas.addEventListener("mouseleave", handleUp);
+
+    canvas.addEventListener("touchstart", (e) => {
+      const { x, y } = getEventPos(e);
+      handleDown(x, y);
+      e.preventDefault();
+    });
+    canvas.addEventListener("touchmove", (e) => {
+      const { x, y } = getEventPos(e);
+      handleMove(x, y);
+      e.preventDefault();
+    });
+    canvas.addEventListener("touchend", (e) => {
+      handleUp();
+      e.preventDefault();
     });
 
     restartBtn.addEventListener("click", () => {
