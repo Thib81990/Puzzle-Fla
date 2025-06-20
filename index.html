@@ -24,7 +24,8 @@
   <canvas id="puzzleCanvas" width="600" height="600"></canvas>
   <script>
     const img = new Image();
-    img.src = "./puzzle-image.png";
+    img.src = "puzzle-image.png";
+    img.crossOrigin = "anonymous";
 
     const rows = 5;
     const cols = 5;
@@ -71,6 +72,11 @@
         );
       }
     }
+
+    // Astuce : forcer rechargement de l'image si besoin
+    img.onerror = () => {
+      console.error("Erreur de chargement de l'image.");
+    };
   </script>
 </body>
 </html>
