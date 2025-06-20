@@ -21,6 +21,9 @@
       border: 2px solid #333;
       margin-top: 20px;
       touch-action: none;
+      width: 90vw;
+      height: auto;
+      max-width: 600px;
     }
     #timer {
       margin-top: 10px;
@@ -37,7 +40,7 @@
 <body>
   <h1>Puzzle Vélo - 16 pièces</h1>
   <div id="timer">Temps : 0 s</div>
-  <canvas id="puzzleCanvas" width="600" height="600"></canvas>
+  <canvas id="puzzleCanvas"></canvas>
   <button id="restartBtn">Rejouer</button>
   <script>
     const img = new Image();
@@ -85,12 +88,15 @@
     }
 
     img.onload = () => {
+      const maxWidth = window.innerWidth * 0.9;
+      const scale = maxWidth / img.width;
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
       pieceSize = {
-        width: img.width / cols,
-        height: img.height / rows
+        width: canvas.width / cols,
+        height: canvas.height / rows
       };
-      canvas.width = img.width;
-      canvas.height = img.height;
       initPuzzle();
     };
 
@@ -99,10 +105,10 @@
       for (const p of pieces) {
         ctx.drawImage(
           img,
-          p.sx,
-          p.sy,
-          pieceSize.width,
-          pieceSize.height,
+          p.sx / img.width * img.width,
+          p.sy / img.height * img.height,
+          img.width / cols,
+          img.height / rows,
           p.dx,
           p.dy,
           pieceSize.width,
@@ -194,6 +200,7 @@
     canvas.addEventListener("mouseup", handleUp);
     canvas.addEventListener("mouseleave", handleUp);
 
+    // Ajout tactile
     canvas.addEventListener("touchstart", (e) => {
       const { x, y } = getEventPos(e);
       handleDown(x, y);
