@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puzzle Vélo - 25 pièces</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: sans-serif;
+    }
+    canvas {
+      border: 2px solid #333;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Puzzle Vélo - 25 pièces</h1>
+  <canvas id="puzzleCanvas" width="600" height="600"></canvas>
+  <script>
+    const img = new Image();
+    img.src = "./puzzle-image.png";
+
+    const rows = 5;
+    const cols = 5;
+    const canvas = document.getElementById("puzzleCanvas");
+    const ctx = canvas.getContext("2d");
+    const pieces = [];
+    let pieceSize;
+
+    img.onload = () => {
+      pieceSize = {
+        width: img.width / cols,
+        height: img.height / rows
+      };
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          pieces.push({
+            sx: x * pieceSize.width,
+            sy: y * pieceSize.height,
+            dx: Math.random() * (canvas.width - pieceSize.width),
+            dy: Math.random() * (canvas.height - pieceSize.height)
+          });
+        }
+      }
+      draw();
+    };
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of pieces) {
+        ctx.drawImage(
+          img,
+          p.sx,
+          p.sy,
+          pieceSize.width,
+          pieceSize.height,
+          p.dx,
+          p.dy,
+          pieceSize.width,
+          pieceSize.height
+        );
+      }
+    }
+  </script>
+</body>
+</html>
