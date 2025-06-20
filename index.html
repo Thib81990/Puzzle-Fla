@@ -71,19 +71,30 @@
         timerDisplay.textContent = `Temps : ${seconds} s`;
       }, 1000);
 
+      const pieceMap = [];
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
-          pieces.push({
-            sx: x * pieceSize.width,
-            sy: y * pieceSize.height,
-            dx: Math.random() * (canvas.width - pieceSize.width),
-            dy: Math.random() * (canvas.height - pieceSize.height),
-            tx: x * pieceSize.width,
-            ty: y * pieceSize.height,
-            placed: false
-          });
+          pieceMap.push({ sx: x * pieceSize.width, sy: y * pieceSize.height });
         }
       }
+
+      // Shuffle the pieceMap to randomize positions
+      const shuffledMap = [...pieceMap].sort(() => Math.random() - 0.5);
+
+      for (let i = 0; i < pieceMap.length; i++) {
+        const p = pieceMap[i];
+        const randomPos = shuffledMap[i];
+        pieces.push({
+          sx: p.sx,
+          sy: p.sy,
+          dx: randomPos.sx,
+          dy: randomPos.sy,
+          tx: p.sx,
+          ty: p.sy,
+          placed: false
+        });
+      }
+
       draw();
     }
 
@@ -105,8 +116,8 @@
       for (const p of pieces) {
         ctx.drawImage(
           img,
-          p.sx / img.width * img.width,
-          p.sy / img.height * img.height,
+          p.sx / canvas.width * img.width,
+          p.sy / canvas.height * img.height,
           img.width / cols,
           img.height / rows,
           p.dx,
